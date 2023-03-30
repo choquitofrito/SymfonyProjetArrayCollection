@@ -53,24 +53,11 @@
 			<div class="form-error">
 				{{ form_errors(form.photo) }}
 			</div>
-		</div>
-
-		<div class="form-group">
-			{{ form_widget(form.submit) }}
-		</div>
-
-		
-    </ul>
-
-   {# <ul class="details">
-        {% for detail in form.details %}
-            <li>{{ form_row(detail.quantite) }}</li>
-        {% endfor %}
-    </ul> #}
-
+		</div>		
+    
 
 		{# the data-index attribute is required for the JavaScript code below #}
-		
+		<div class="form-group">
 		<ul class="details"
 			data-index="{{ form.details|length > 0 ? form.details|last.vars.name + 1 : 0 }}"  
 			data-prototype="{{ form_widget(form.details.vars.prototype)|e('html_attr') }}">
@@ -79,23 +66,23 @@
 			{{ form_widget (formSearch) }} {# cet élément, appartenant à un autre form, sera ignoré dans le submit 
 											on doit gérer son "change" en JS #}
 
-			
 			{% for detail in form.details %}
 				{# arranger la liste et son css selon les besoins #}
-
-            	<li>{{ form_row(detail.quantite) }}</li>
-				<li>{{ form_row(detail.mesure) }}</li>
+            	<li>{{ detail.ingredient.nom }} Qté: {{ form_row(detail.quantite) }} Mésure:{{ form_row(detail.mesure) }}</li>
 				<li style="display:none">{{ form_row(detail.ingredients) }}</li>
-				
         	{% endfor %}
 		
 		</ul>
-		<button type="button" class="add_item_link" data-collection-holder-class="details">+</button>
+		</div>
+		{# <button type="button" class="add_item_link" data-collection-holder-class="details">+</button> #}
 
 
-			{{ form_row(form._token) }}
-		
-		{{ form_end(form, {render_rest:false}) }}
+		{{ form_row(form._token) }}
+		<div class="form-group">
+			{{ form_widget(form.submit) }}
+		</div>
+	
+{{ form_end(form, {render_rest:false}) }}
 
 
 

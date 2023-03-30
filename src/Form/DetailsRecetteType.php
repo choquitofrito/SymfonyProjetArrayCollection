@@ -20,7 +20,7 @@ class DetailsRecetteType extends AbstractType
                 'class' => Ingredients::class,
                 'choice_label' => 'nom',
                 'attr' => [
-                    'class' => 'select2'
+                    
                 ],
             ]);
     }
