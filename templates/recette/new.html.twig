@@ -2,16 +2,6 @@
 
 {% block title %}MealMatch- Nouvelle Recette{% endblock %}
 
-{% block javascripts %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-{% endblock %}
-{% block stylesheet %}
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-{% endblock %}
-
-
-
 {% block body %}
 <div class="container">
 <h1 class="mt-4">Nouvelle Recette</h1>
@@ -72,7 +62,6 @@
 		
     </ul>
 
-
    {# <ul class="details">
         {% for detail in form.details %}
             <li>{{ form_row(detail.quantite) }}</li>
@@ -85,13 +74,21 @@
 		<ul class="details"
 			data-index="{{ form.details|length > 0 ? form.details|last.vars.name + 1 : 0 }}"  
 			data-prototype="{{ form_widget(form.details.vars.prototype)|e('html_attr') }}">
+			
+		{# ce code est pour lupdate, pour afficher les détails éxistants #}	
+			{{ form_widget (formSearch) }} {# cet élément, appartenant à un autre form, sera ignoré dans le submit 
+											on doit gérer son "change" en JS #}
+
+			
 			{% for detail in form.details %}
-				<br>
+				{# arranger la liste et son css selon les besoins #}
+
             	<li>{{ form_row(detail.quantite) }}</li>
 				<li>{{ form_row(detail.mesure) }}</li>
-				<li>{{ form_row(detail.ingredients) }}</li>
+				<li style="display:none">{{ form_row(detail.ingredients) }}</li>
 				
         	{% endfor %}
+		
 		</ul>
 		<button type="button" class="add_item_link" data-collection-holder-class="details">+</button>
 
@@ -101,9 +98,6 @@
 		{{ form_end(form, {render_rest:false}) }}
 
 
-{{ form_start(formSearch) }}
-{{ form_widget(formSearch) }}
-{{ form_end(formSearch) }}
 
 </div>
 
@@ -112,6 +106,34 @@
 
 {% block customJS %}
 <script>
+
+// code js pour rajouter les nouveaux détails. On doit le modifier pour l'adapter à nos besoins
+// (on ne peut plus choisir l'ingrédient, ce ne sera plus une liste déroulante)
+// Ce script crée les <li> pour le DOM. Tout modification du css ou de layout
+// sera faite dans le script
+
+// ceci est le code original, plus bas une modification possible pour
+// afficher l'ingrédient comme un texte au lieu d'une liste déroulante.
+// On va cacher la liste déroulante. On ne peut pas l'effacer car autrement 
+// les détails ne s'enverront plus quand on fait submit!
+
+{# 
+const addFormToCollection = (e) => {
+  const collectionHolder = document.querySelector('.' + e.currentTarget.dataset.collectionHolderClass);
+  const item = document.createElement('li');
+  item.innerHTML = collectionHolder
+    .dataset
+    .prototype
+    .replace(
+      /__name__/g,
+      collectionHolder.dataset.index
+    );
+  collectionHolder.appendChild(item);
+  collectionHolder.dataset.index++;
+
+	 
+}; 
+#}
 
 const addFormToCollection = (e) => {
   const collectionHolder = document.querySelector('.' + e.currentTarget.dataset.collectionHolderClass);
@@ -125,6 +147,8 @@ const addFormToCollection = (e) => {
     );
   collectionHolder.appendChild(item);
   collectionHolder.dataset.index++;
+
+	 
 };
 
 
@@ -135,10 +159,7 @@ document
   });
 
 
-// transformer les select en select2
-$(document).ready(function() {
-	$('.select2').select2(); 
-});
+
 
 </script>
 

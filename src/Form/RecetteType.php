@@ -125,7 +125,9 @@ class RecetteType extends AbstractType
                     'class' => Categories::class,
                     
                     'choice_label' => 'nom',
-                    
+                    'attr' => [
+                        'class' => 'select2',
+                    ]
                 ])
     
                 ->add('details', CollectionType::class, [

@@ -18,7 +18,10 @@ class DetailsRecetteType extends AbstractType
             ->add('mesure')
             ->add('ingredients', EntityType::class, [
                 'class' => Ingredients::class,
-                'choice_label' => 'nom'
+                'choice_label' => 'nom',
+                'attr' => [
+                    'class' => 'select2'
+                ],
             ]);
     }
 

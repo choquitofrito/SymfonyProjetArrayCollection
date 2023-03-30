@@ -14,7 +14,7 @@ class SearchIngredientType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('name', EntityType::class, [
+            ->add('nom', EntityType::class, [
                 'class' => Ingredients::class,
                 'choice_label' => 'nom',
                 'attr' => [
