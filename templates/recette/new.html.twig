@@ -68,7 +68,7 @@
 
 			{% for detail in form.details %}
 				{# arranger la liste et son css selon les besoins #}
-            	<li>{{ detail.ingredient.nom }} Qté: {{ form_row(detail.quantite) }} Mésure:{{ form_row(detail.mesure) }}</li>
+            	<li>Qté: {{ form_row(detail.quantite) }} Mésure:{{ form_row(detail.mesure) }}</li>
 				<li style="display:none">{{ form_row(detail.ingredients) }}</li>
         	{% endfor %}
 		
