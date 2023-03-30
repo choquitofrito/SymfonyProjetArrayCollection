@@ -58,22 +58,34 @@
 
 		{# the data-index attribute is required for the JavaScript code below #}
 		<div class="form-group">
+			<input type="text" id="input_recherche" placeholder="Rechercher ingrédient...">
+		</div>
+		{# liste à remplir quand on reçoit le résultat de la recherche du fetch. Modal, s'affiche sur le reste du DOM. Style plus bas, à mettre dans un autre fichier #}
+		
+		<div id="modalIngredients" class="modal">
+			<div class="modal-content">
+			<ul id="ul_ingredients">
+			</ul>
+			</div>
+		</div>
+
+		<div class="form-group">
 		<ul class="details"
 			data-index="{{ form.details|length > 0 ? form.details|last.vars.name + 1 : 0 }}"  
 			data-prototype="{{ form_widget(form.details.vars.prototype)|e('html_attr') }}">
 			
-		{# ce code est pour lupdate, pour afficher les détails éxistants #}	
-			{{ form_widget (formSearch) }} {# cet élément, appartenant à un autre form, sera ignoré dans le submit 
-											on doit gérer son "change" en JS #}
 
+		{# ce code est pour lupdate, pour afficher les détails éxistants 	
 			{% for detail in form.details %}
-				{# arranger la liste et son css selon les besoins #}
+				<!-- arranger la liste et son css selon les besoins -->
             	<li>Qté: {{ form_row(detail.quantite) }} Mésure:{{ form_row(detail.mesure) }}</li>
 				<li style="display:none">{{ form_row(detail.ingredients) }}</li>
         	{% endfor %}
-		
+		#}
 		</ul>
 		</div>
+
+
 		{# <button type="button" class="add_item_link" data-collection-holder-class="details">+</button> #}
 
 
@@ -104,24 +116,6 @@
 // On va cacher la liste déroulante. On ne peut pas l'effacer car autrement 
 // les détails ne s'enverront plus quand on fait submit!
 
-{# 
-const addFormToCollection = (e) => {
-  const collectionHolder = document.querySelector('.' + e.currentTarget.dataset.collectionHolderClass);
-  const item = document.createElement('li');
-  item.innerHTML = collectionHolder
-    .dataset
-    .prototype
-    .replace(
-      /__name__/g,
-      collectionHolder.dataset.index
-    );
-  collectionHolder.appendChild(item);
-  collectionHolder.dataset.index++;
-
-	 
-}; 
-#}
-
 const addFormToCollection = (e) => {
   const collectionHolder = document.querySelector('.' + e.currentTarget.dataset.collectionHolderClass);
   const item = document.createElement('li');
@@ -138,7 +132,6 @@ const addFormToCollection = (e) => {
 	 
 };
 
-
 document
   .querySelectorAll('.add_item_link')
   .forEach(btn => {
@@ -146,9 +139,77 @@ document
   });
 
 
+// barre de recherche
+const input_recherche = document.getElementById('input_recherche');
+const ul_ingredients = document.getElementById('ul_ingredients');
+
+// script recherche: appel AJAX et obtention des résultats
+input_recherche.addEventListener('keyup', function() {
+	fetch ('/search/ingredients/' + input_recherche.value.toLowerCase())
+	.then((response) => response.json())
+  	.then((ingredients) => {
+		ul_ingredients.innerHTML = "";
+		ingredients.forEach ((ingredient) => {
+			console.log (ingredient);
+			// vider et remplir la liste de choix d'ingrédients (li dans l'ul)
+			// remplir la liste d'options
+			let li_ingredient = document.createElement('li');
+			li_ingredient.innerHTML = ingredient.nom;
+			li_ingredient.value = ingredient.id;
+
+			// action pour le click de l'option: afficher un détail pour remplir quantité et mésure, et afficher le nom de l'ingrédient
+			li_ingredient.addEventListener ('click', (event)=>{
+				console.log (li_ingredient.value);
+			});
+
+			ul_ingredients.appendChild(li_ingredient);
+			modalIngredients.style.display = 'block';
+	})
+
+});
+
+
+
+
+
+	/*const recherche = input_rechercheInput.value.toLowerCase();
+	for (let i = 0; i < options.length; i++) {
+		const optionText = options[i].textContent.toLowerCase();
+		if (optionText.indexOf(recherche) > -1) {
+			options[i].style.display = '';
+		} else {
+			options[i].style.display = 'none';
+		}
+	}*/
+});
 
 
 </script>
+
+<style>
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+</style>
 
 {% endblock %}
 

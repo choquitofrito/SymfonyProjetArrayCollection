@@ -112,6 +112,7 @@ class RecetteController extends AbstractController
         return $this->render('recette/new.html.twig', [
             'form' => $form->createView(),
             'formSearch' => $formSearch->createView(),
+              
         ]);
     }
 
@@ -173,4 +174,5 @@ class RecetteController extends AbstractController
             ['recette' => $recette]
         );
     }
+
 }
