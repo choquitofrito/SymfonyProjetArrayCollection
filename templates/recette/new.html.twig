@@ -57,17 +57,12 @@
     
 
 		{# the data-index attribute is required for the JavaScript code below #}
-		<div class="form-group">
+		<div class="form-group search-container">
 			<input type="text" id="input_recherche" placeholder="Rechercher ingrédient...">
+			<div id="search-results"></div>
 		</div>
 		{# liste à remplir quand on reçoit le résultat de la recherche du fetch. Modal, s'affiche sur le reste du DOM. Style plus bas, à mettre dans un autre fichier #}
-		
-		<div id="modalIngredients" class="modal">
-			<div class="modal-content">
-			<ul id="ul_ingredients">
-			</ul>
-			</div>
-		</div>
+
 
 		<div class="form-group">
 		<ul class="details"
@@ -141,14 +136,19 @@ document
 
 // barre de recherche
 const input_recherche = document.getElementById('input_recherche');
-const ul_ingredients = document.getElementById('ul_ingredients');
+const search_results = document.getElementById('search-results');
 
 // script recherche: appel AJAX et obtention des résultats
 input_recherche.addEventListener('keyup', function() {
 	fetch ('/search/ingredients/' + input_recherche.value.toLowerCase())
 	.then((response) => response.json())
   	.then((ingredients) => {
-		ul_ingredients.innerHTML = "";
+		
+		search_results.innerHTML = "";
+        const ul = document.createElement('ul');
+        ul.classList.add('search-results-list');
+        search_results.appendChild(ul);
+
 		ingredients.forEach ((ingredient) => {
 			console.log (ingredient);
 			// vider et remplir la liste de choix d'ingrédients (li dans l'ul)
@@ -162,8 +162,7 @@ input_recherche.addEventListener('keyup', function() {
 				console.log (li_ingredient.value);
 			});
 
-			ul_ingredients.appendChild(li_ingredient);
-			modalIngredients.style.display = 'block';
+			ul.appendChild(li_ingredient);
 	})
 
 });
@@ -187,26 +186,43 @@ input_recherche.addEventListener('keyup', function() {
 </script>
 
 <style>
-/* The Modal (background) */
-.modal {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+.search-container {
+  position: relative;
 }
 
-/* Modal Content/Box */
-.modal-content {
-  background-color: #fefefe;
-  margin: 15% auto; /* 15% from the top and centered */
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%; /* Could be more or less, depending on screen size */
+.search-container input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  outline: none;
+}
+
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 999;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-results li {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.search-results li:hover {
+  background-color: #f2f2f2;
 }
 
 </style>
