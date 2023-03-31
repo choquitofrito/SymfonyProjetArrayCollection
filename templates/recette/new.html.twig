@@ -144,8 +144,8 @@ const addFormToCollectionCustom = (idCollectionHolder, idIngredient, nomIngredie
 
 
 	// mettre le value (id de l'ingredient) pour le hidden
-	let hiddenDetail = item.getElementsByClassName("hidden_detail")[0];
-	hiddenDetail.value = idIngredient;
+	let hiddenDetailIngredient = item.getElementsByClassName("hidden_detail_ingredient")[0];
+	hiddenDetailIngredient.value = idIngredient;
 
 	// console.log (item.innerHTML);
 	
@@ -172,8 +172,8 @@ const addDetailFormDeleteLink = (item) => {
         e.preventDefault();
 
 		// mettre le value (id de l'ingredient) pour le hidden
-		let hiddenDetail = item.getElementsByClassName("hidden_detail")[0];
-		idIngredient = hiddenDetail.value ;
+		let hiddenDetailIngredient = item.getElementsByClassName("hidden_detail_ingredient")[0];
+		idIngredient = hiddenDetailIngredient.value ;
 		
 		// on doit éliminer de la liste d'interdits
 		const index = chosenIngredientsIds.indexOf(idIngredient);

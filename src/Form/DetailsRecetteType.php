@@ -33,7 +33,7 @@ class DetailsRecetteType extends AbstractType
                 HiddenType::class,
                 [
                     'attr' => [
-                        'class' => 'hidden_detail',
+                        'class' => 'hidden_detail_ingredient',
                     ]
                 ]
             )

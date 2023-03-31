@@ -2,9 +2,10 @@
 
 {% block title %}MealMatch- Nouvelle Recette{% endblock %}
 
+
 {% block body %}
 <div class="container">
-<h1 class="mt-4">Nouvelle Recette</h1>
+<h1 class="mt-4">Modifier Recette</h1>
 {{ form_start(form, {'attr': {'autocomplete':'off'}} ) }}
 
 		<div class="form-group">
@@ -99,7 +100,9 @@
 {% block customJS %}
 <script>
 
-// code js pour rajouter les nouveaux détails. On doit le modifier pour l'adapter à nos besoins
+// code js pour rajouter les nouveaux détails 
+// De la doc https://symfony.com/doc/current/form/form_collections.html. 
+// On doit le modifier pour l'adapter à nos besoins
 // (on ne peut plus choisir l'ingrédient, ce ne sera plus une liste déroulante)
 // Ce script crée les <li> pour le DOM. Tout modification du css ou de layout
 // sera faite dans le script
@@ -109,25 +112,6 @@
 // On va cacher la liste déroulante. On ne peut pas l'effacer car autrement 
 // les détails ne s'enverront plus quand on fait submit!
  
-{# const addFormToCollection = (e) => {
-
-  console.log(e.currentTarget.dataset.collectionHolderClass);
-
-  const collectionHolder = document.querySelector('.' + e.currentTarget.dataset.collectionHolderClass);
-  const item = document.createElement('li');
-  item.innerHTML = collectionHolder
-    .dataset
-    .prototype
-    .replace(
-      /__name__/g,
-      collectionHolder.dataset.index
-    );
-  collectionHolder.appendChild(item);
-  collectionHolder.dataset.index++;
-
-	 
-};   #}
-
 
 // dans cette version, addFormToCollection reçoit l'id de l'ul qui contient la collection
 // Cette fonction rajoute les forms de détail, mais il faut incruster l'id de l'ingrédient choisi dans un hidden (voir type du form)
@@ -149,11 +133,9 @@ const addFormToCollectionCustom = (idCollectionHolder, idIngredient, nomIngredie
 
 
 	// mettre le value (id de l'ingredient) pour le hidden
-	let hiddenDetail = item.getElementsByClassName("hidden_detail")[0];
-	hiddenDetail.value = idIngredient;
+	let hiddenDetailIngredient = item.getElementsByClassName("hidden_detail_ingredient")[0];
+	hiddenDetailIngredient.value = idIngredient;
 
-	// console.log (item.innerHTML);
-	
 	// rajouter le form du détail
 	collectionHolder.appendChild(item);
 	collectionHolder.dataset.index++;
@@ -162,10 +144,6 @@ const addFormToCollectionCustom = (idCollectionHolder, idIngredient, nomIngredie
 	// rajouter bouton delete
     addDetailFormDeleteLink(item); 
 
-
-	console.log (item.innerHTML);
-
-	
 	
 }; 
 
@@ -183,11 +161,11 @@ const addDetailFormDeleteLink = (item) => {
         e.preventDefault();
 
 		// mettre le value (id de l'ingredient) pour le hidden
-		let hiddenDetail = item.getElementsByClassName("hidden_detail")[0];
-		idIngredient = hiddenDetail.value ;
+		let hiddenDetailIngredient = item.getElementsByClassName("hidden_detail_ingredient")[0];
+		idIngredient = hiddenDetailIngredient.value ;
 		
 		// on doit éliminer de la liste d'interdits
-		const index = chosenIngredientsIds.indexOf(idIngredient);
+		const index = chosenIngredientsIds.indexOf(parseInt(idIngredient));
 		chosenIngredientsIds.splice(index, 1);
 
 		console.log ("On efface de la liste d'interdits:");
@@ -199,10 +177,12 @@ const addDetailFormDeleteLink = (item) => {
     });
 } 
 
+
+
+// rajouter les liens pour effacer pour tous les li du details (c.à.d. chaque détail)
 document
     .querySelectorAll('ul.details li')
     .forEach((item) => {
-		// rajouter les liens pour effacer
     	addDetailFormDeleteLink(item); 
     });
 
@@ -218,7 +198,11 @@ let debounceTimer;
 // keep track of the options already chosen
 let chosenIngredientsIds = [];
 
-// script recherche: appel AJAX et obtention des résultats
+
+
+
+
+// script recherche: appel AJAX et obtention des ingrédients
 input_recherche.addEventListener('keyup', function ()  {
 
 	// obliger une attente avant de lancer un autre appel ajax
@@ -246,6 +230,9 @@ input_recherche.addEventListener('keyup', function ()  {
 			// parcourir les ingrédients et on crée les li pour pouvoir choisir un
 			ingredients.forEach ((ingredient) => {
 
+				console.log (chosenIngredientsIds);
+				console.log (ingredient.id);
+				console.log (chosenIngredientsIds.includes (ingredient.id));
 
 				// si l'ingrédient n'est pas sur un détail, l'afficher dans la liste
 				if (!chosenIngredientsIds.includes (ingredient.id)){
@@ -270,7 +257,7 @@ input_recherche.addEventListener('keyup', function ()  {
 							// console.log ("nom cliqué: " + nomIngredient);
 						
 							// rajouter l'id de l'ingrédient dans la liste pour ne pas l'afficher
-							chosenIngredientsIds.push (ingredient.id);
+							chosenIngredientsIds.push (parseInt(ingredient.id));
 							
 							
 							// Effacer la liste de recherche
@@ -320,7 +307,20 @@ const sortLis = (ulId) => {
 
 addEventListener("DOMContentLoaded", (event) => {
 
+	// trier les détails qui se trouvent déjà dans la BD
 	sortLis ("details");
+
+	// effacer le choix des ingrédients qui se trouvent dans ces détails
+	document.querySelectorAll(".hidden_detail_ingredient")
+	.forEach ((hiddenInput) => {
+		// mettre l'ingredient dans la liste des ingredients à ne pas afficher dans la liste de recherche
+		// pour les détails qui sont déjà dans la BD
+		chosenIngredientsIds.push (parseInt(hiddenInput.value));
+							
+		console.log (chosenIngredientsIds);
+	});
+
+
 });
   
 
