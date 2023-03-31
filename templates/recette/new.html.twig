@@ -158,10 +158,39 @@ const addFormToCollectionCustom = (idCollectionHolder, idIngredient, nomIngredie
 	collectionHolder.dataset.index++;
 
 	console.log (item.innerHTML);
-	 
+
+	// rajouter les liens pour effacer
+    addTagFormDeleteLink(item); 
+
+	
 }; 
 
- 
+
+const addTagFormDeleteLink = (item) => {
+    const removeFormButton = document.createElement('button');
+    removeFormButton.innerText = 'X';
+
+    item.append(removeFormButton);
+
+    removeFormButton.addEventListener('click', (e) => {
+        e.preventDefault();
+
+		// mettre le value (id de l'ingredient) pour le hidden
+		let hiddenDetail = item.getElementsByClassName("hidden_detail")[0];
+		idIngredient = hiddenDetail.value ;
+		
+		// on doit éliminer de la liste d'interdits
+		const index = chosenIngredientsIds.indexOf(idIngredient);
+		chosenIngredientsIds.splice(index, 1);
+
+		console.log ("On efface de la liste d'interdits:");
+		console.log (chosenIngredientsIds);
+
+        // remove the li for the tag form
+        item.remove();
+
+    });
+} 
 
 // barre de recherche
 const input_recherche = document.getElementById('input_recherche');
@@ -202,7 +231,6 @@ input_recherche.addEventListener('keyup', function ()  {
 			// parcourir les ingrédients et on crée les li pour pouvoir choisir un
 			ingredients.forEach ((ingredient) => {
 
-				console.log ("out" + chosenIngredientsIds);
 
 				// si l'ingrédient n'est pas sur un détail, l'afficher dans la liste
 				if (!chosenIngredientsIds.includes (ingredient.id)){
@@ -216,7 +244,6 @@ input_recherche.addEventListener('keyup', function ()  {
 						// rajouter le li au ul
 						ul.appendChild(li_ingredient);
 
-						console.log (chosenIngredientsIds);
 
 						// action pour le click de l'ingrédient: 
 						// afficher les composants du form pour stocker 
@@ -251,48 +278,6 @@ input_recherche.addEventListener('keyup', function ()  {
 	},500);
 });
 
-
-/*
-// crée le détail dans le DOM sous la forme des inputs pour pouvoir les envoyer au controller. 
-const creer_detail_DOM = (id, nom)=>{
-	let div_details = document.getElementById ("div_details");
-
-	//div_details.innerHTML += "<br>";
-	//div_details.innerHTML += `<input type='hidden' name='recette[details][${id}]' value='${id}'>`;
-	//div_details.innerHTML += `${nom} `;
-
-
-
-	let quantite = document.createElement('input');
-	quantite.name = `recette[details][][${id}][quantite]`;
-	quantite.type ='number';
-
-	let li = document.createElement('li');
-	li.appendChild (quantite);
-	ul_details.appendChild(li);
-
-	let mesure = document.createElement('input');
-	mesure.name = `recette[details][${id}][mesure]`;
-	mesure.type ='text'
-	div_details.appendChild (mesure);
-
-	// div_details.innerHTML += `<input type='number' name='recette[details][${id}][quantite]' placeholder='Quantité'>`;
-	// div_details.innerHTML += `<input type='text' name='recette[details][${id}][mesure]' placeholder='Mesure'>`;
-	search_results.innerHTML = "";
-			
-}
-*/
-
-
-	/*const recherche = input_rechercheInput.value.toLowerCase();
-	for (let i = 0; i < options.length; i++) {
-		const optionText = options[i].textContent.toLowerCase();
-		if (optionText.indexOf(recherche) > -1) {
-			options[i].style.display = '';
-		} else {
-			options[i].style.display = 'none';
-		}
-	}*/
 
 
 </script>
