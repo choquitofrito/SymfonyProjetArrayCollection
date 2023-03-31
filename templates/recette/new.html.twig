@@ -95,6 +95,8 @@
 <script>
 
 // code js pour rajouter les nouveaux détails. On doit le modifier pour l'adapter à nos besoins
+// De la doc https://symfony.com/doc/current/form/form_collections.html. 
+// On doit le modifier pour l'adapter à nos besoins
 // (on ne peut plus choisir l'ingrédient, ce ne sera plus une liste déroulante)
 // Ce script crée les <li> pour le DOM. Tout modification du css ou de layout
 // sera faite dans le script
@@ -104,24 +106,6 @@
 // On va cacher la liste déroulante. On ne peut pas l'effacer car autrement 
 // les détails ne s'enverront plus quand on fait submit!
  
-{# const addFormToCollection = (e) => {
-
-  console.log(e.currentTarget.dataset.collectionHolderClass);
-
-  const collectionHolder = document.querySelector('.' + e.currentTarget.dataset.collectionHolderClass);
-  const item = document.createElement('li');
-  item.innerHTML = collectionHolder
-    .dataset
-    .prototype
-    .replace(
-      /__name__/g,
-      collectionHolder.dataset.index
-    );
-  collectionHolder.appendChild(item);
-  collectionHolder.dataset.index++;
-
-	 
-};   #}
 
 
 // dans cette version, addFormToCollection reçoit l'id de l'ul qui contient la collection
@@ -147,8 +131,6 @@ const addFormToCollectionCustom = (idCollectionHolder, idIngredient, nomIngredie
 	let hiddenDetailIngredient = item.getElementsByClassName("hidden_detail_ingredient")[0];
 	hiddenDetailIngredient.value = idIngredient;
 
-	// console.log (item.innerHTML);
-	
 	// rajouter le form du détail
 	collectionHolder.appendChild(item);
 	collectionHolder.dataset.index++;
@@ -157,7 +139,6 @@ const addFormToCollectionCustom = (idCollectionHolder, idIngredient, nomIngredie
 	// rajouter bouton delete
     addDetailFormDeleteLink(item); 
 
-	console.log (item.innerHTML);
 	
 }; 
 
@@ -176,7 +157,7 @@ const addDetailFormDeleteLink = (item) => {
 		idIngredient = hiddenDetailIngredient.value ;
 		
 		// on doit éliminer de la liste d'interdits
-		const index = chosenIngredientsIds.indexOf(idIngredient);
+		const index = chosenIngredientsIds.indexOf(parseInt(idIngredient));
 		chosenIngredientsIds.splice(index, 1);
 
 		console.log ("On efface de la liste d'interdits:");
@@ -256,13 +237,15 @@ input_recherche.addEventListener('keyup', function ()  {
 
 							
 							// rajouter l'id de l'ingrédient dans la liste pour ne pas l'afficher
-							chosenIngredientsIds.push (ingredient.id);
+							chosenIngredientsIds.push (parseInt(ingredient.id));
 							
 							
 							// Effacer la liste de recherche
 							search_results.innerHTML = "";
 							// Créer le détail dans le DOM. On envoie l'id de l'élément qui contient les nouveaux forms
 							addFormToCollectionCustom("details", ingredient.id, nomIngredient); // on envoie l'id de l'ul qui contiendra les forms
+							// trier les lis dans l'ul
+							sortLis ("details");							
 
 							// effacer le terme de recherche
 							document.getElementById("input_recherche").value="";
@@ -305,25 +288,6 @@ addEventListener("DOMContentLoaded", (event) => {
 	sortLis ("details");
 });
   
-
-// Observer pour detecter de changement dans le ul (lis rajoutés dynamiquement)
-const ul = document.getElementById('details');
-
-const observer = new MutationObserver(function(mutations) {
-  mutations.forEach(function(mutation) {
-    if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-      for (let i = 0; i < mutation.addedNodes.length; i++) {
-        const addedNode = mutation.addedNodes[i];
-        if (addedNode.nodeName === 'LI') {
-          // trier si nouveau li
-		  // sortLis("details");
-        }
-      }
-    }
-  });
-});
-
-observer.observe(ul, { childList: true });
 
 
 </script>

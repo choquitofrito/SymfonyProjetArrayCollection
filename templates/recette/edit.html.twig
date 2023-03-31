@@ -2,7 +2,6 @@
 
 {% block title %}MealMatch- Nouvelle Recette{% endblock %}
 
-
 {% block body %}
 <div class="container">
 <h1 class="mt-4">Modifier Recette</h1>
@@ -148,9 +147,6 @@ const addFormToCollectionCustom = (idCollectionHolder, idIngredient, nomIngredie
 }; 
 
 
-
-
-
 const addDetailFormDeleteLink = (item) => {
     const removeFormButton = document.createElement('button');
     removeFormButton.innerText = 'X';
@@ -183,6 +179,7 @@ const addDetailFormDeleteLink = (item) => {
 document
     .querySelectorAll('ul.details li')
     .forEach((item) => {
+		// rajouter les liens pour effacer
     	addDetailFormDeleteLink(item); 
     });
 
@@ -197,10 +194,6 @@ let debounceTimer;
 
 // keep track of the options already chosen
 let chosenIngredientsIds = [];
-
-
-
-
 
 // script recherche: appel AJAX et obtention des ingrédients
 input_recherche.addEventListener('keyup', function ()  {
@@ -230,9 +223,6 @@ input_recherche.addEventListener('keyup', function ()  {
 			// parcourir les ingrédients et on crée les li pour pouvoir choisir un
 			ingredients.forEach ((ingredient) => {
 
-				console.log (chosenIngredientsIds);
-				console.log (ingredient.id);
-				console.log (chosenIngredientsIds.includes (ingredient.id));
 
 				// si l'ingrédient n'est pas sur un détail, l'afficher dans la liste
 				if (!chosenIngredientsIds.includes (ingredient.id)){
@@ -254,7 +244,6 @@ input_recherche.addEventListener('keyup', function ()  {
 
 							let nomIngredient = e.currentTarget.innerHTML;
 							
-							// console.log ("nom cliqué: " + nomIngredient);
 						
 							// rajouter l'id de l'ingrédient dans la liste pour ne pas l'afficher
 							chosenIngredientsIds.push (parseInt(ingredient.id));
