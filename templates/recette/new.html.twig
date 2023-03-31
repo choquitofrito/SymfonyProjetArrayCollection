@@ -171,6 +171,9 @@ const search_results = document.getElementById('search-results');
 // on utilise la technique de debouncing pour éviter l'accumulation d'appels AJAX
 let debounceTimer; 
 
+// keep track of the options already chosen
+let chosenIngredientsIds = [];
+
 // script recherche: appel AJAX et obtention des résultats
 input_recherche.addEventListener('keyup', function ()  {
 
@@ -199,33 +202,48 @@ input_recherche.addEventListener('keyup', function ()  {
 			// parcourir les ingrédients et on crée les li pour pouvoir choisir un
 			ingredients.forEach ((ingredient) => {
 
-				// remplir la liste d'options
-				let li_ingredient = document.createElement('li');
-				li_ingredient.innerHTML = ingredient.nom;
-				
-				// stocker dans le li l'id de l'ingredient choisi
-				li_ingredient.value = ingredient.id;
+				console.log ("out" + chosenIngredientsIds);
 
-				// rajouter le li au ul
-				ul.appendChild(li_ingredient);
+				// si l'ingrédient n'est pas sur un détail, l'afficher dans la liste
+				if (!chosenIngredientsIds.includes (ingredient.id)){
+						// remplir la liste d'options
+						let li_ingredient = document.createElement('li');
+						li_ingredient.innerHTML = ingredient.nom;
+						
+						// stocker dans le li l'id de l'ingredient choisi
+						li_ingredient.value = ingredient.id;
 
-				// action pour le click de l'ingrédient: 
-				// afficher les composants du form pour stocker 
-				// un détail (remplir quantité et mésure et stocker, caché, l'id de l'ingrédient)
-				li_ingredient.addEventListener ('click', (e)=>{
+						// rajouter le li au ul
+						ul.appendChild(li_ingredient);
 
-					let nomIngredient = e.currentTarget.innerHTML;
-					
-					// console.log ("nom cliqué: " + nomIngredient);
-					
-					
-					// Effacer la liste de recherche
-					search_results.innerHTML = "";
-					// Créer le détail dans le DOM. On envoie l'id de l'élément qui contient les nouveaux forms
-					addFormToCollectionCustom("details", ingredient.id, nomIngredient); // on envoie l'id de l'ul qui contiendra les forms
+						console.log (chosenIngredientsIds);
 
-				});
+						// action pour le click de l'ingrédient: 
+						// afficher les composants du form pour stocker 
+						// un détail (remplir quantité et mésure et stocker, caché, l'id de l'ingrédient)
+						li_ingredient.addEventListener ('click', (e)=>{
 
+							let nomIngredient = e.currentTarget.innerHTML;
+							
+							// console.log ("nom cliqué: " + nomIngredient);
+						
+							// rajouter l'id de l'ingrédient dans la liste pour ne pas l'afficher
+							chosenIngredientsIds.push (ingredient.id);
+							
+							
+							// Effacer la liste de recherche
+							search_results.innerHTML = "";
+							// Créer le détail dans le DOM. On envoie l'id de l'élément qui contient les nouveaux forms
+							addFormToCollectionCustom("details", ingredient.id, nomIngredient); // on envoie l'id de l'ul qui contiendra les forms
+
+							
+						});
+
+				}
+				else {
+
+
+				}
 				
 			});
 			 
