@@ -99,6 +99,8 @@ class RecetteController extends AbstractController
         EntityManagerInterface $manager
     ): Response {
         $form = $this->createForm(RecetteType::class, $recette);
+
+        
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
