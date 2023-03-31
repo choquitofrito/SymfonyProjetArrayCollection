@@ -70,14 +70,14 @@
 		</div>
 
 		
+		{# ul qui contient tous le forms de détail #}
 		<div class="form-group">
 		<ul id="details" class="details"
 			data-index="{{ form.details|length > 0 ? form.details|last.vars.name + 1 : 0 }}"  
 			data-prototype="{{ form_widget(form.details.vars.prototype)|e('html_attr') }}">
-		
+		{# généré en js! #}
 		</ul>
 		</div> 
-		{# <button type="button" class="add_item_link" data-collection-holder-class="details">+</button>    #}
 
 		{{ form_row(form._token) }}
 		<div class="form-group">
@@ -106,9 +106,9 @@
 // On va cacher la liste déroulante. On ne peut pas l'effacer car autrement 
 // les détails ne s'enverront plus quand on fait submit!
  
-const addFormToCollection = (e) => {
+{# const addFormToCollection = (e) => {
 
-	console.log(e.currentTarget.dataset.collectionHolderClass);
+  console.log(e.currentTarget.dataset.collectionHolderClass);
 
   const collectionHolder = document.querySelector('.' + e.currentTarget.dataset.collectionHolderClass);
   const item = document.createElement('li');
@@ -123,14 +123,15 @@ const addFormToCollection = (e) => {
   collectionHolder.dataset.index++;
 
 	 
-};  
+};   #}
 
 
 // dans cette version, addFormToCollection reçoit l'id de l'ul qui contient la collection
 // Cette fonction rajoute les forms de détail, mais il faut incruster l'id de l'ingrédient choisi dans un hidden (voir type du form)
-const addFormToCollectionCustom = (idCollectionHolder) => {
+const addFormToCollectionCustom = (idCollectionHolder, idIngredient, nomIngredient) => {
 
 	let collectionHolder = document.querySelector ("." + idCollectionHolder);
+
 
 	const item = document.createElement('li');
 	
@@ -142,10 +143,13 @@ const addFormToCollectionCustom = (idCollectionHolder) => {
 		collectionHolder.dataset.index
 	);
 
+	// insérer le nom comme prémier élément
+	item.prepend (document.createTextNode (nomIngredient));
+
 
 	// mettre le value (id de l'ingredient) pour le hidden
 	let hiddenDetail = item.getElementsByClassName("hidden_detail")[0];
-	hiddenDetail.value = 3;
+	hiddenDetail.value = idIngredient;
 
 	// console.log (item.innerHTML);
 	
@@ -153,17 +157,11 @@ const addFormToCollectionCustom = (idCollectionHolder) => {
 	collectionHolder.appendChild(item);
 	collectionHolder.dataset.index++;
 
-
+	console.log (item.innerHTML);
 	 
 }; 
 
  
-{# document
-  .querySelectorAll('.add_item_link')
-  .forEach(btn => {
-      btn.addEventListener("click", addFormToCollection)
-  });  #}
-
 
 // barre de recherche
 const input_recherche = document.getElementById('input_recherche');
@@ -214,12 +212,17 @@ input_recherche.addEventListener('keyup', function ()  {
 				// action pour le click de l'ingrédient: 
 				// afficher les composants du form pour stocker 
 				// un détail (remplir quantité et mésure et stocker, caché, l'id de l'ingrédient)
-				li_ingredient.addEventListener ('click', ( )=>{
+				li_ingredient.addEventListener ('click', (e)=>{
 
+					let nomIngredient = e.currentTarget.innerHTML;
+					
+					// console.log ("nom cliqué: " + nomIngredient);
+					
+					
 					// Effacer la liste de recherche
 					search_results.innerHTML = "";
-					// Créer le détail dans le DOM);
-					addFormToCollectionCustom("details", ingredient.id); // on envoie l'id de l'ul qui contiendra les forms
+					// Créer le détail dans le DOM. On envoie l'id de l'élément qui contient les nouveaux forms
+					addFormToCollectionCustom("details", ingredient.id, nomIngredient); // on envoie l'id de l'ul qui contiendra les forms
 
 				});
 
