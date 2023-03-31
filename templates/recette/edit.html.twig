@@ -5,7 +5,9 @@
 {% block body %}
 <div class="container">
 <h1 class="mt-4">Modifier Recette</h1>
-{{ form_start(form, {'attr': {'autocomplete':'off'}} ) }}
+
+
+{{ form_start(form, {'attr': {'autocomplete':'off', 'id':'form_recette' , 'data-recette-id': recetteId }} ) }}
 
 		<div class="form-group">
 			{{ form_label(form.titre) }}
@@ -87,6 +89,7 @@
 		{{ form_row(form._token) }}
 		<div class="form-group">
 			{{ form_widget(form.submit) }}
+			
 		</div>
 	
 {{ form_end(form, {render_rest:false}) }}
@@ -306,8 +309,51 @@ addEventListener("DOMContentLoaded", (event) => {
 		// pour les détails qui sont déjà dans la BD
 		chosenIngredientsIds.push (parseInt(hiddenInput.value));
 							
-		console.log (chosenIngredientsIds);
 	});
+
+
+	// AJAX form submit
+	const form = document.getElementById('form_recette');
+
+	form.addEventListener('submit', async (event) => {
+		event.preventDefault();
+
+		const formData = new FormData(form);
+
+		// on pourrait générer l'url avec FOSRouting, ici on le fait à la main
+		const url = "/recette/save/" + document.getElementById('form_recette').dataset.recetteId;
+		
+
+		try {
+			const response = await fetch(url, {
+				method: 'POST',
+				body: formData
+				
+			});
+
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
+
+			const data = await response.json();
+
+			if (!data.success && data.errors) {
+				// Display form errors
+				const errors = data.errors;
+				Object.keys(errors).forEach((name) => {
+					const field = form.querySelector(`[name="${name}"]`);
+					const errorContainer = field.closest('.form-group').querySelector('.error-message');
+					errorContainer.textContent = errors[name];
+				});
+			} else {
+				// Handle successful form submission
+				// ...
+			}
+		} catch (error) {
+			console.error('There was an error submitting the form', error);
+		}
+	});
+
 
 
 });
