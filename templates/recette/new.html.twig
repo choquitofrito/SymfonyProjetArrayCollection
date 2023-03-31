@@ -86,8 +86,6 @@
 	
 {{ form_end(form, {render_rest:false}) }}
 
-
-
 </div>
 
 
@@ -131,8 +129,6 @@
 const addFormToCollectionCustom = (idCollectionHolder, idIngredient, nomIngredient) => {
 
 	let collectionHolder = document.querySelector ("." + idCollectionHolder);
-
-
 	const item = document.createElement('li');
 	
 	item.innerHTML = collectionHolder
@@ -252,8 +248,8 @@ input_recherche.addEventListener('keyup', function ()  {
 
 							let nomIngredient = e.currentTarget.innerHTML;
 							
-							// console.log ("nom cliqué: " + nomIngredient);
-						
+
+							
 							// rajouter l'id de l'ingrédient dans la liste pour ne pas l'afficher
 							chosenIngredientsIds.push (ingredient.id);
 							
@@ -263,6 +259,8 @@ input_recherche.addEventListener('keyup', function ()  {
 							// Créer le détail dans le DOM. On envoie l'id de l'élément qui contient les nouveaux forms
 							addFormToCollectionCustom("details", ingredient.id, nomIngredient); // on envoie l'id de l'ul qui contiendra les forms
 
+							// effacer le terme de recherche
+							document.getElementById("input_recherche").reset();			
 							
 						});
 
