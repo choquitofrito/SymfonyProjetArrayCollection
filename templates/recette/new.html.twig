@@ -5,7 +5,7 @@
 {% block body %}
 <div class="container">
 <h1 class="mt-4">Nouvelle Recette</h1>
-{{ form_start(form) }}
+{{ form_start(form, {'attr': {'autocomplete':'off'}} ) }}
 
 		<div class="form-group">
 			{{ form_label(form.titre) }}
@@ -56,33 +56,28 @@
 		</div>		
     
 
-		{# the data-index attribute is required for the JavaScript code below #}
+
+		{# barre de Recherche #}
+		{# liste à remplir quand on reçoit le résultat de la recherche du fetch. Modal, s'affiche sur le reste 
+		du DOM. Style plus bas, à mettre dans un autre fichier. Notez qu'on désactive l'autocomplete de l'input 
+		#}
 		<div class="form-group search-container">
-			<input type="text" id="input_recherche" placeholder="Rechercher ingrédient...">
-			<div id="search-results"></div>
+			Ingrédients:
+			<input type="text" id="input_recherche" placeholder="Rechercher ingrédient..." autocomplete="off">
+			<div id="search-results">
+			{# ici il aura les ingrédients trouvés #}
+			</div>
 		</div>
-		{# liste à remplir quand on reçoit le résultat de la recherche du fetch. Modal, s'affiche sur le reste du DOM. Style plus bas, à mettre dans un autre fichier #}
 
-
+		
 		<div class="form-group">
-		<ul class="details"
+		<ul id="details" class="details"
 			data-index="{{ form.details|length > 0 ? form.details|last.vars.name + 1 : 0 }}"  
 			data-prototype="{{ form_widget(form.details.vars.prototype)|e('html_attr') }}">
-			
-
-		{# ce code est pour lupdate, pour afficher les détails éxistants 	
-			{% for detail in form.details %}
-				<!-- arranger la liste et son css selon les besoins -->
-            	<li>Qté: {{ form_row(detail.quantite) }} Mésure:{{ form_row(detail.mesure) }}</li>
-				<li style="display:none">{{ form_row(detail.ingredients) }}</li>
-        	{% endfor %}
-		#}
+		
 		</ul>
-		</div>
-
-
-		{# <button type="button" class="add_item_link" data-collection-holder-class="details">+</button> #}
-
+		</div> 
+		{# <button type="button" class="add_item_link" data-collection-holder-class="details">+</button>    #}
 
 		{{ form_row(form._token) }}
 		<div class="form-group">
@@ -110,8 +105,11 @@
 // afficher l'ingrédient comme un texte au lieu d'une liste déroulante.
 // On va cacher la liste déroulante. On ne peut pas l'effacer car autrement 
 // les détails ne s'enverront plus quand on fait submit!
-
+ 
 const addFormToCollection = (e) => {
+
+	console.log(e.currentTarget.dataset.collectionHolderClass);
+
   const collectionHolder = document.querySelector('.' + e.currentTarget.dataset.collectionHolderClass);
   const item = document.createElement('li');
   item.innerHTML = collectionHolder
@@ -125,50 +123,144 @@ const addFormToCollection = (e) => {
   collectionHolder.dataset.index++;
 
 	 
-};
+};  
 
-document
+
+// dans cette version, addFormToCollection reçoit l'id de l'ul qui contient la collection
+// Cette fonction rajoute les forms de détail, mais il faut incruster l'id de l'ingrédient choisi dans un hidden (voir type du form)
+const addFormToCollectionCustom = (idCollectionHolder) => {
+
+	let collectionHolder = document.querySelector ("." + idCollectionHolder);
+
+	const item = document.createElement('li');
+	
+	item.innerHTML = collectionHolder
+	.dataset
+	.prototype
+	.replace(
+		/__name__/g,
+		collectionHolder.dataset.index
+	);
+
+
+	// mettre le value (id de l'ingredient) pour le hidden
+	let hiddenDetail = item.getElementsByClassName("hidden_detail")[0];
+	hiddenDetail.value = 3;
+
+	// console.log (item.innerHTML);
+	
+	// rajouter le form du détail
+	collectionHolder.appendChild(item);
+	collectionHolder.dataset.index++;
+
+
+	 
+}; 
+
+ 
+{# document
   .querySelectorAll('.add_item_link')
   .forEach(btn => {
       btn.addEventListener("click", addFormToCollection)
-  });
+  });  #}
 
 
 // barre de recherche
 const input_recherche = document.getElementById('input_recherche');
 const search_results = document.getElementById('search-results');
 
+
+// on utilise la technique de debouncing pour éviter l'accumulation d'appels AJAX
+let debounceTimer; 
+
 // script recherche: appel AJAX et obtention des résultats
-input_recherche.addEventListener('keyup', function() {
-	fetch ('/search/ingredients/' + input_recherche.value.toLowerCase())
-	.then((response) => response.json())
-  	.then((ingredients) => {
-		
-		search_results.innerHTML = "";
-        const ul = document.createElement('ul');
-        ul.classList.add('search-results-list');
-        search_results.appendChild(ul);
+input_recherche.addEventListener('keyup', function ()  {
 
-		ingredients.forEach ((ingredient) => {
-			console.log (ingredient);
-			// vider et remplir la liste de choix d'ingrédients (li dans l'ul)
-			// remplir la liste d'options
-			let li_ingredient = document.createElement('li');
-			li_ingredient.innerHTML = ingredient.nom;
-			li_ingredient.value = ingredient.id;
+	// obliger une attente avant de lancer un autre appel ajax
+	clearTimeout(debounceTimer);
+	debounceTimer = setTimeout(function() {	
 
-			// action pour le click de l'option: afficher un détail pour remplir quantité et mésure, et afficher le nom de l'ingrédient
-			li_ingredient.addEventListener ('click', (event)=>{
-				console.log (li_ingredient.value);
+		// appel Ajax à action dans IngredientsController qui renverra les ingrédients qui conviennent à la recherche
+		fetch ('/search/ingredients/' + input_recherche.value.toLowerCase())
+		.then((response) => response.json())
+		.then((ingredients) => {
+			
+			// effacer l'ancienne recherche
+			// vider la liste de choix d'ingrédients (li dans l'ul)
+			search_results.innerHTML = "";
+
+			// ré-créer la liste qui affiche les éléments trouvés
+			const ul = document.createElement('ul');
+
+			// rajouter une class pour manipuler plus facilement en JS
+			ul.classList.add('search-results-list');
+
+			// rajouter le ul au div
+			search_results.appendChild(ul);
+
+			// parcourir les ingrédients et on crée les li pour pouvoir choisir un
+			ingredients.forEach ((ingredient) => {
+
+				// remplir la liste d'options
+				let li_ingredient = document.createElement('li');
+				li_ingredient.innerHTML = ingredient.nom;
+				
+				// stocker dans le li l'id de l'ingredient choisi
+				li_ingredient.value = ingredient.id;
+
+				// rajouter le li au ul
+				ul.appendChild(li_ingredient);
+
+				// action pour le click de l'ingrédient: 
+				// afficher les composants du form pour stocker 
+				// un détail (remplir quantité et mésure et stocker, caché, l'id de l'ingrédient)
+				li_ingredient.addEventListener ('click', ( )=>{
+
+					// Effacer la liste de recherche
+					search_results.innerHTML = "";
+					// Créer le détail dans le DOM);
+					addFormToCollectionCustom("details", ingredient.id); // on envoie l'id de l'ul qui contiendra les forms
+
+				});
+
+				
 			});
-
-			ul.appendChild(li_ingredient);
-	})
-
+			 
+		});
+	},500);
 });
 
 
+/*
+// crée le détail dans le DOM sous la forme des inputs pour pouvoir les envoyer au controller. 
+const creer_detail_DOM = (id, nom)=>{
+	let div_details = document.getElementById ("div_details");
 
+	//div_details.innerHTML += "<br>";
+	//div_details.innerHTML += `<input type='hidden' name='recette[details][${id}]' value='${id}'>`;
+	//div_details.innerHTML += `${nom} `;
+
+
+
+	let quantite = document.createElement('input');
+	quantite.name = `recette[details][][${id}][quantite]`;
+	quantite.type ='number';
+
+	let li = document.createElement('li');
+	li.appendChild (quantite);
+	ul_details.appendChild(li);
+
+	let mesure = document.createElement('input');
+	mesure.name = `recette[details][${id}][mesure]`;
+	mesure.type ='text'
+	div_details.appendChild (mesure);
+
+	// div_details.innerHTML += `<input type='number' name='recette[details][${id}][quantite]' placeholder='Quantité'>`;
+	// div_details.innerHTML += `<input type='text' name='recette[details][${id}][mesure]' placeholder='Mesure'>`;
+	search_results.innerHTML = "";
+			
+}
+*/
 
 
 	/*const recherche = input_rechercheInput.value.toLowerCase();
@@ -180,7 +272,6 @@ input_recherche.addEventListener('keyup', function() {
 			options[i].style.display = 'none';
 		}
 	}*/
-});
 
 
 </script>

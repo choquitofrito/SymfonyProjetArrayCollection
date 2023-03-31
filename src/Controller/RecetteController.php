@@ -67,26 +67,26 @@ class RecetteController extends AbstractController
 
         $recette = new Recette();
 
-        $details1 = new DetailsRecette();
-        $details1->setQuantite('12');
-        $details1->setMesure('gr');
-        $ing = new Ingredients();
-        $ing->setNom ('rizzzz');
-        $manage->persist($ing);
-        $details1->setIngredients($ing);
+        // $details1 = new DetailsRecette();
+        // $details1->setQuantite('12');
+        // $details1->setMesure('gr');
+        // $ing = new Ingredients();
+        // $ing->setNom ('rizzzz');
+        // $manage->persist($ing);
+        // $details1->setIngredients($ing);
 
-        $recette->getDetails()->add($details1);
+        // $recette->getDetails()->add($details1);
 
-        $details2 = new DetailsRecette();
-        $details2->setQuantite('5');
-        $details2->setMesure('ml');
-        $ing2 = new Ingredients();
-        $ing2->setNom ('rizzzz');
-        $manage->persist($ing2);
-        $details1->setIngredients($ing2);
+        // $details2 = new DetailsRecette();
+        // $details2->setQuantite('5');
+        // $details2->setMesure('ml');
+        // $ing2 = new Ingredients();
+        // $ing2->setNom ('rizzzz');
+        // $manage->persist($ing2);
+        // $details1->setIngredients($ing2);
 
 
-        $recette->getDetails()->add($details2);
+        // $recette->getDetails()->add($details2);
 
         //rajouter cette recette vide dans le formulaire
         $form = $this->createForm(RecetteType::class, $recette);
@@ -94,7 +94,7 @@ class RecetteController extends AbstractController
 
 
         if ($form->isSubmitted() && $form->isValid()) {
-
+    
             $recette->setUser($this->getUser());
             $manage->persist($recette);
             $manage->flush();

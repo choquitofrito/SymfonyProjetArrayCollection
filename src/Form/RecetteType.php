@@ -51,9 +51,10 @@ class RecetteType extends AbstractType
                     'class' => 'form-label mt-4'
                 ],
                 'constraints' => [
-                    new Assert\Length(['min' => 2, 'max' => 50]),
-                    new Assert\NotBlank()
-                ]])
+                    new Assert\Positive(),
+                    new Assert\LessThan(10000)
+                ]
+            ])
 
             ->add('tempsCuisson',  TextType::class, [
                 'attr' => [
@@ -66,11 +67,12 @@ class RecetteType extends AbstractType
                     'class' => 'form-label mt-4'
                 ],
                 'constraints' => [
-                    new Assert\Length(['min' => 2, 'max' => 50]),
-                    new Assert\NotBlank()
-                ]])
+                    new Assert\Positive(),
+                    new Assert\LessThan(1000)
+                ]
+            ])
 
-            ->add('nbPersonne',IntegerType::class, [
+            ->add('nbPersonne', IntegerType::class, [
                 'attr' => [
                     'class' => 'form-control',
                     'min' => 1,
@@ -100,7 +102,7 @@ class RecetteType extends AbstractType
                     'class' => 'form-label mt-4'
                 ],
                 'constraints' => [
-                    new Assert\Length(['min' => 2, 'max' => 255]),
+                    new Assert\Length(['min' => 5, 'max' => 255]),
                     new Assert\NotBlank()
                 ]
 
@@ -118,34 +120,32 @@ class RecetteType extends AbstractType
                 'constraints' => [
                     new Assert\NotBlank()
                 ]
-])    
+            ])
 
 
-                ->add('categories', EntityType::class, [
-                    'class' => Categories::class,
-                    
-                    'choice_label' => 'nom',
-                    'attr' => [
-                        'class' => 'select2',
-                    ]
-                ])
-    
-                ->add('details', CollectionType::class, [
-                    'entry_type' => DetailsRecetteType::class,
-                    'entry_options' => ['label' => false],
-                    'allow_add' => true,
-                    'by_reference' => false,
-                ])
-          
-            
+            ->add('categories', EntityType::class, [
+                'class' => Categories::class,
+
+                'choice_label' => 'nom',
+                'attr' => [
+                    'class' => 'select2',
+                ]
+            ])
+
+            ->add('details', CollectionType::class, [
+                'entry_type' => DetailsRecetteType::class,
+                'entry_options' => ['label' => false],
+                'allow_add' => true,
+                'by_reference' => false,
+            ])
+
+
             ->add('submit', SubmitType::class, [
                 'attr' => [
                     'class' => 'btn btn-primary mt-4'
                 ],
                 'label' => 'Enregistrer la recette'
-            ]);
-
-        ;
+            ]);;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
