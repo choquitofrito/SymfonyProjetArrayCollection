@@ -153,16 +153,16 @@ const addFormToCollectionCustom = (idCollectionHolder, idIngredient, nomIngredie
 	collectionHolder.appendChild(item);
 	collectionHolder.dataset.index++;
 
+
+	// rajouter bouton delete
+    addDetailFormDeleteLink(item); 
+
 	console.log (item.innerHTML);
-
-	// rajouter les liens pour effacer
-    addTagFormDeleteLink(item); 
-
 	
 }; 
 
 
-const addTagFormDeleteLink = (item) => {
+const addDetailFormDeleteLink = (item) => {
     const removeFormButton = document.createElement('button');
     removeFormButton.innerText = 'X';
 
@@ -182,12 +182,17 @@ const addTagFormDeleteLink = (item) => {
 		console.log ("On efface de la liste d'interdits:");
 		console.log (chosenIngredientsIds);
 
-        // remove the li for the tag form
+        // remove the detail form
         item.remove();
 
     });
 } 
-
+document
+    .querySelectorAll('ul.details li')
+    .forEach((item) => {
+		// rajouter les liens pour effacer
+    	addDetailFormDeleteLink(item); 
+    });
 // barre de recherche
 const input_recherche = document.getElementById('input_recherche');
 const search_results = document.getElementById('search-results');
@@ -260,7 +265,7 @@ input_recherche.addEventListener('keyup', function ()  {
 							addFormToCollectionCustom("details", ingredient.id, nomIngredient); // on envoie l'id de l'ul qui contiendra les forms
 
 							// effacer le terme de recherche
-							document.getElementById("input_recherche").reset();			
+							document.getElementById("input_recherche").value="";
 							
 						});
 
@@ -276,6 +281,49 @@ input_recherche.addEventListener('keyup', function ()  {
 	},500);
 });
 
+
+const sortLis = (ulId) => {
+	// sort everything
+	const ul = document.getElementById(ulId); // replace 'details' with your list's ID
+	const lis = Array.from(ul.getElementsByTagName('li')); // get all the list items
+	lis.sort(function (a, b) {
+		return a.firstChild.data.localeCompare(b.firstChild.data); // sort the list items alphabetically based on their text content
+	});
+
+	while (ul.firstChild) {
+	ul.removeChild(ul.firstChild);
+	};
+
+	lis.forEach((li) => {
+		ul.appendChild(li); 
+	});
+}
+
+
+addEventListener("DOMContentLoaded", (event) => {
+
+	sortLis ("details");
+});
+  
+
+// Observer pour detecter de changement dans le ul (lis rajoutés dynamiquement)
+const ul = document.getElementById('details');
+
+const observer = new MutationObserver(function(mutations) {
+  mutations.forEach(function(mutation) {
+    if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+      for (let i = 0; i < mutation.addedNodes.length; i++) {
+        const addedNode = mutation.addedNodes[i];
+        if (addedNode.nodeName === 'LI') {
+          // trier si nouveau li
+		  // sortLis("details");
+        }
+      }
+    }
+  });
+});
+
+observer.observe(ul, { childList: true });
 
 
 </script>

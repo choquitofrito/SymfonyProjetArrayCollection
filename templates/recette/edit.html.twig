@@ -68,20 +68,16 @@
 			{# ici il aura les ingrédients trouvés #}
 			</div>
 		</div>
-
-
 		
 		{# ul qui contient tous le forms de détail #}
 		<div class="form-group">
 		<ul id="details" class="details"
 			data-index="{{ form.details|length > 0 ? form.details|last.vars.name + 1 : 0 }}"  
 			data-prototype="{{ form_widget(form.details.vars.prototype)|e('html_attr') }}">
-		{# généré en js! #}
-
+		{# forms originales + forms générés en js! #}
 		{% for item in form.details %}
 			<li>{{ item.vars.value.ingredients.nom }}
 			{{ form_widget (item)}}
-			{# {{ dump (item.vars.full_name)}} #}
 			</li> 
 		{% endfor %}
 		
@@ -282,9 +278,10 @@ input_recherche.addEventListener('keyup', function ()  {
 							// Créer le détail dans le DOM. On envoie l'id de l'élément qui contient les nouveaux forms
 							addFormToCollectionCustom("details", ingredient.id, nomIngredient); // on envoie l'id de l'ul qui contiendra les forms
 							
+							// trier les lis dans l'ul
+							sortLis ("details");							
 							
 							// effacer le terme de recherche
-							console.log (document.getElementById("input_recherche"));
 							document.getElementById("input_recherche").value="";
 
 						});
@@ -326,25 +323,6 @@ addEventListener("DOMContentLoaded", (event) => {
 	sortLis ("details");
 });
   
-
-// Observer pour detecter de changement dans le ul (lis rajoutés dynamiquement)
-const ul = document.getElementById('details');
-
-const observer = new MutationObserver(function(mutations) {
-  mutations.forEach(function(mutation) {
-    if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-      for (let i = 0; i < mutation.addedNodes.length; i++) {
-        const addedNode = mutation.addedNodes[i];
-        if (addedNode.nodeName === 'LI') {
-          // trier si nouveau li
-		  // sortLis("details");
-        }
-      }
-    }
-  });
-});
-
-observer.observe(ul, { childList: true });
 
 
 </script>
