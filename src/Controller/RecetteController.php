@@ -10,10 +10,13 @@ use App\Entity\DetailsRecette;
 use App\Form\SearchIngredientType;
 use App\Repository\RecetteRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Form\FormInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -63,31 +66,13 @@ class RecetteController extends AbstractController
     #[Route('/recette/creation', name: 'recette_creation')]
     public function new(Request $request, EntityManagerInterface $manage): Response
     {
-        //créer une nouvelle recette vide
         $recette = new Recette();
-        //rajouter cette recette vide dans le formulaire
         $form = $this->createForm(RecetteType::class, $recette);
         $form->handleRequest($request);
 
 
-        if ($form->isSubmitted() && $form->isValid()) {
-    
-            $recette->setUser($this->getUser());
-            $manage->persist($recette);
-            $manage->flush();
-
-            $this->addFlash(
-                'success',
-                'Votre recette a été créé avec succès !'
-            );
-            return $this->redirectToRoute('recette_index');
-        }
-
-            
-        
         return $this->render('recette/new.html.twig', [
             'form' => $form->createView()
-              
         ]);
     }
 
@@ -98,33 +83,88 @@ class RecetteController extends AbstractController
         Request $request,
         EntityManagerInterface $manager
     ): Response {
-        $form = $this->createForm(RecetteType::class, $recette);
 
-        
+        $form = $this->createForm(RecetteType::class, $recette);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            $recette = $form->getData();
-            $manager->persist($recette);
-
-            $manager->flush();
-
-            $this->addFlash(
-                'success',
-                'Votre recette a été modifié avec succès !'
-            );
-
-
-
-            return $this->redirectToRoute('recette_index');
-        }
-
         return $this->render('recette/edit.html.twig', [
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'recetteId' => $recette->getId()
         ]);
     }
 
+    #[Security("is_granted('ROLE_USER') and user === recette.getUser()")]
+    #[Route('/recette/save/{id}', 'recette_save')]
+    public function saveAjax(Recette $recette, Request $request, ManagerRegistry $doctrine)
+    {
+
+
+        $form = $this->createForm(RecetteType::class, $recette);
+        
+        $form->handleRequest($request);
+        
+
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // dd("submit");
+            $doctrine->getManager()->persist($recette);
+
+            $doctrine->getManager()->flush();
+            return new JsonResponse(['success' => true, 'errors' => []]);
+
+        }
+        if (!$form->isValid()){
+            $errors = $this->getErrorsFromForm($form);
+            return new JsonResponse(['success' => false, 'errors' => $errors]);
+
+        }
+    }
+
+    
+    // on pourrait fusioner le save pour l'update et pour le new. On laisse tous les deux juste pour la clareté
+    #[Route('/recette/new/save', 'recette_new_save')]
+    public function newSaveAjax(Request $request, ManagerRegistry $doctrine)
+    {
+        $recette = new Recette();
+
+        $form = $this->createForm(RecetteType::class, $recette);
+        
+        $form->handleRequest($request);
+
+        // attention il faut fixer le user
+        $recette->setUser($this->getUser());
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // dd($recette);
+            // dd("submit");
+            $doctrine->getManager()->persist($recette);
+
+            $doctrine->getManager()->flush();
+            return new JsonResponse(['success' => true, 'errors' => []]);
+
+        }
+        if (!$form->isValid()){
+            $errors = $this->getErrorsFromForm($form);
+            return new JsonResponse(['success' => false, 'errors' => $errors]);
+
+        }
+    }
+
+    private function getErrorsFromForm(FormInterface $form): array
+    {
+        $errors = [];
+
+        foreach ($form->getErrors() as $error) {
+            $errors[] = $error->getMessage();
+        }
+
+        foreach ($form->all() as $childForm) {
+            if (!$childForm->isValid()) {
+                $errors[$childForm->getName()] = $this->getErrorsFromForm($childForm);
+            }
+        }
+        return $errors;
+    }
 
     #[Route('/recette/suppression/{id}', 'recette.delete', methods: ['GET'])]
     #[Security("is_granted('ROLE_USER') and user === recette.getUser()")]
@@ -151,5 +191,4 @@ class RecetteController extends AbstractController
             ['recette' => $recette]
         );
     }
-
 }

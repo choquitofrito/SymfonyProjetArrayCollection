@@ -5,7 +5,8 @@
 {% block body %}
 <div class="container">
 <h1 class="mt-4">Nouvelle Recette</h1>
-{{ form_start(form, {'attr': {'autocomplete':'off'}} ) }}
+
+{{ form_start(form, {'attr': {'autocomplete':'off', 'id':'form_recette' , 'data-recette-id': null }} ) }}
 
 		<div class="form-group">
 			{{ form_label(form.titre) }}
@@ -167,7 +168,9 @@ const addDetailFormDeleteLink = (item) => {
         item.remove();
 
     });
-} 
+}
+// rajouter les liens pour effacer pour tous les li du details (c.à.d. chaque détail)
+ 
 document
     .querySelectorAll('ul.details li')
     .forEach((item) => {
@@ -185,7 +188,7 @@ let debounceTimer;
 // keep track of the options already chosen
 let chosenIngredientsIds = [];
 
-// script recherche: appel AJAX et obtention des résultats
+// script recherche: appel AJAX et obtention des ingrédients
 input_recherche.addEventListener('keyup', function ()  {
 
 	// obliger une attente avant de lancer un autre appel ajax
@@ -286,6 +289,55 @@ const sortLis = (ulId) => {
 addEventListener("DOMContentLoaded", (event) => {
 
 	sortLis ("details");
+
+	// AJAX form submit
+	const form = document.getElementById('form_recette');
+
+	form.addEventListener('submit', async (event) => {
+		event.preventDefault();
+
+		const formData = new FormData(form);
+
+		// on pourrait générer l'url avec FOSRouting, ici on le fait à la main
+		const url = "/recette/new/save";
+		
+
+		const response = await fetch(url, {
+			method: 'POST',
+			body: formData,
+			
+		});
+
+		if (!response.ok) {
+			throw new Error('Network response was not ok');
+		}
+
+		const data = await response.json();
+
+		// ici on affichera les erreurs de la Recette mais pour afficher les érreurs des détails il faut faire plus de traitement
+		if (!data.success && data.errors) {
+			// Display form errors
+			const errors = data.errors;
+			Object.keys(errors).forEach((name) => {
+				const field = document.getElementsByName("recette[" + name +"]")[0];
+
+				const errorContainer = field.closest("div").querySelector(".form-error")
+				errorContainer.textContent = errors[name];
+			});
+		} else {
+			// les changements sont stockés, faire quoi qui ce soit
+			// alert("enregistrement ok, décider quoi faire dans le DOM ici");
+			
+			// on appelle une autre action d'ici
+			// Ce n'est pas possible de le faire car la réponse 
+			// ne s'affichera pas, elle est dans l'objet response en JS 
+			window.location.href = "/recette";
+		}
+	
+	});
+
+
+
 });
   
 

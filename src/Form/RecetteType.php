@@ -2,8 +2,6 @@
 
 namespace App\Form;
 
-use Assert\Length;
-use Assert\NotBlank;
 use App\Entity\Recette;
 use App\Entity\Categories;
 use App\Form\DetailsRecetteType;
@@ -136,6 +134,7 @@ class RecetteType extends AbstractType
                 'entry_type' => DetailsRecetteType::class,
                 'entry_options' => ['label' => false],
                 'allow_add' => true,
+                'allow_delete' => true,
                 'by_reference' => false,
             ])
 
