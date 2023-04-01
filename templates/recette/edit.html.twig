@@ -80,6 +80,7 @@
 		{% for item in form.details %}
 			<li>{{ item.vars.value.ingredients.nom }}
 			{{ form_widget (item)}}
+			{{ form_errors (item)}}
 			</li> 
 		{% endfor %}
 		
@@ -324,34 +325,33 @@ addEventListener("DOMContentLoaded", (event) => {
 		const url = "/recette/save/" + document.getElementById('form_recette').dataset.recetteId;
 		
 
-		try {
-			const response = await fetch(url, {
-				method: 'POST',
-				body: formData
-				
-			});
+		const response = await fetch(url, {
+			method: 'POST',
+			body: formData,
+			
+		});
 
-			if (!response.ok) {
-				throw new Error('Network response was not ok');
-			}
-
-			const data = await response.json();
-
-			if (!data.success && data.errors) {
-				// Display form errors
-				const errors = data.errors;
-				Object.keys(errors).forEach((name) => {
-					const field = form.querySelector(`[name="${name}"]`);
-					const errorContainer = field.closest('.form-group').querySelector('.error-message');
-					errorContainer.textContent = errors[name];
-				});
-			} else {
-				// Handle successful form submission
-				// ...
-			}
-		} catch (error) {
-			console.error('There was an error submitting the form', error);
+		if (!response.ok) {
+			throw new Error('Network response was not ok');
 		}
+
+		const data = await response.json();
+
+		// ici on affichera les erreurs de la Recette mais pour afficher les érreurs des détails il faut faire plus de traitement
+		if (!data.success && data.errors) {
+			// Display form errors
+			const errors = data.errors;
+			Object.keys(errors).forEach((name) => {
+				const field = document.getElementsByName("recette[" + name +"]")[0];
+
+				const errorContainer = field.closest("div").querySelector(".form-error")
+				errorContainer.textContent = errors[name];
+			});
+		} else {
+			// les changements sont stockés, faire quoi qui ce soit
+			alert("update ok, décider quoi faire dans le DOM ici");
+		}
+	
 	});
 
 

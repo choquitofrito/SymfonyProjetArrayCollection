@@ -117,21 +117,28 @@ class RecetteController extends AbstractController
     {
 
         $form = $this->createForm(RecetteType::class, $recette);
-        foreach ($recette->getDetails() as $detail){
-            // dump ($detail->getQuantite());
-        }
-    
-        dd($request->request);
-        $form->handleRequest($request);
         
-        if ($form->isSubmitted()) { //&& $form->isValid()) {
+        //dump ($recette);
+        // dump ($recette->getDetails()[0]);
+        // dump ($request);
+        // dd();
+        $form->handleRequest($request);
+        // dump ($recette->getDetails());
+        
+
+
+        if ($form->isSubmitted() && $form->isValid()) {
             // dd("submit");
             $doctrine->getManager()->persist($recette);
 
             $doctrine->getManager()->flush();
+            return new JsonResponse(['success' => true, 'errors' => []]);
 
+        }
+        if (!$form->isValid()){
             $errors = $this->getErrorsFromForm($form);
             return new JsonResponse(['success' => false, 'errors' => $errors]);
+
         }
     }
 
@@ -148,7 +155,6 @@ class RecetteController extends AbstractController
                 $errors[$childForm->getName()] = $this->getErrorsFromForm($childForm);
             }
         }
-
         return $errors;
     }
 
