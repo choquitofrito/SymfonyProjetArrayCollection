@@ -66,31 +66,13 @@ class RecetteController extends AbstractController
     #[Route('/recette/creation', name: 'recette_creation')]
     public function new(Request $request, EntityManagerInterface $manage): Response
     {
-        //créer une nouvelle recette vide
         $recette = new Recette();
-        //rajouter cette recette vide dans le formulaire
         $form = $this->createForm(RecetteType::class, $recette);
         $form->handleRequest($request);
 
 
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            $recette->setUser($this->getUser());
-            $manage->persist($recette);
-            $manage->flush();
-
-            $this->addFlash(
-                'success',
-                'Votre recette a été créé avec succès !'
-            );
-            return $this->redirectToRoute('recette_index');
-        }
-
-
-
         return $this->render('recette/new.html.twig', [
             'form' => $form->createView()
-
         ]);
     }
 
@@ -116,18 +98,44 @@ class RecetteController extends AbstractController
     public function saveAjax(Recette $recette, Request $request, ManagerRegistry $doctrine)
     {
 
+
         $form = $this->createForm(RecetteType::class, $recette);
         
-        //dump ($recette);
-        // dump ($recette->getDetails()[0]);
-        // dump ($request);
-        // dd();
         $form->handleRequest($request);
-        // dump ($recette->getDetails());
         
 
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // dd("submit");
+            $doctrine->getManager()->persist($recette);
+
+            $doctrine->getManager()->flush();
+            return new JsonResponse(['success' => true, 'errors' => []]);
+
+        }
+        if (!$form->isValid()){
+            $errors = $this->getErrorsFromForm($form);
+            return new JsonResponse(['success' => false, 'errors' => $errors]);
+
+        }
+    }
+
+    
+    // on pourrait fusioner le save pour l'update et pour le new. On laisse tous les deux juste pour la clareté
+    #[Route('/recette/new/save', 'recette_new_save')]
+    public function newSaveAjax(Request $request, ManagerRegistry $doctrine)
+    {
+        $recette = new Recette();
+
+        $form = $this->createForm(RecetteType::class, $recette);
+        
+        $form->handleRequest($request);
+
+        // attention il faut fixer le user
+        $recette->setUser($this->getUser());
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // dd($recette);
             // dd("submit");
             $doctrine->getManager()->persist($recette);
 
