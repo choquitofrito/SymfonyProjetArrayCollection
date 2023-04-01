@@ -122,6 +122,7 @@ class RecetteController extends AbstractController
 
     
     // on pourrait fusioner le save pour l'update et pour le new. On laisse tous les deux juste pour la clareté
+    #[Security("is_granted('ROLE_USER')")]
     #[Route('/recette/new/save', 'recette_new_save')]
     public function newSaveAjax(Request $request, ManagerRegistry $doctrine)
     {
